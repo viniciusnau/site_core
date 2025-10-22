@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:13
+    container_name: SITE_DB
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=site_database_user
+      - POSTGRES_PASSWORD=DPE@01491!qwerty
+      - POSTGRES_DB=site_database
+    restart: always
+
+  redis:
+    image: redis:latest
+    container_name: SITE_REDIS
+    ports:
+      - "6379:6379"
+    restart: always
+
+  celery:
+    build: .
+    container_name: SITE_CELERY
+    command: celery -A dpe_core.celery worker -l INFO
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  celerybeat:
+    build: .
+    container_name: SITE_CELERY_BEAT
+    command: celery -A dpe_core.celery beat -l INFO
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  web:
+    build: .
+    container_name: SITE_SERVER
+    command: sh -c "
+      yes | python manage.py makemigrations --merge &&
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    restart: always
