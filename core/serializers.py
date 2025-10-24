@@ -23,18 +23,18 @@ from core.models import (
     SocialMedia,
     Subcategory,
     Records,
-    Posters, 
+    Posters,
     Cards,
     Banner,
     Tag,
     TypeOfService,
     Unit,
     UnitService,
-    WebsiteInformations, 
+    WebsiteInformations,
     CardRegister,
     Container,
     ServiceButtons,
-    QuickAccessButtons,
+    QuickAccessButtons, Page,
 )
 
 
@@ -534,4 +534,9 @@ class QuickAccessButtonsSerializer(serializers.ModelSerializer):
         model = QuickAccessButtons
         fields = "__all__"
         read_only_fields = ["author", "created_at", "updated_at", "published_at"]
-        
+
+
+class PageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Page
+        fields = "__all__"

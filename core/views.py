@@ -5,9 +5,10 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.core.exceptions import PermissionDenied
 
 from .models import (
     FAQ,
@@ -30,11 +31,11 @@ from .models import (
     TypeOfService,
     Unit,
     UnitService,
-    WebsiteInformations, 
+    WebsiteInformations,
     CardRegister,
     Container,
     ServiceButtons,
-    QuickAccessButtons,
+    QuickAccessButtons, Page,
 )
 from .serializers import (
     AreaOfActivitySerializer,
@@ -55,13 +56,13 @@ from .serializers import (
     TagSerializer,
     TypeOfServiceSerializer,
     UnitSerializer,
-    WebsiteInformationsSerializer, 
+    WebsiteInformationsSerializer,
     CardRegisterSerializer,
     BannerSerializer,
     ContainerSerializer,
     ServiceButtonsSerializer,
-    QuickAccessButtonsSerializer,
-    )
+    QuickAccessButtonsSerializer, PageSerializer,
+)
 
 
 class FaqView(generics.GenericAPIView):
@@ -1340,3 +1341,55 @@ class QuickAccessButtonsView(generics.GenericAPIView):
         quick_access_buttons.delete()
         return Response(f"Quick access buttons {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
 
+
+class PageView(generics.GenericAPIView):
+    queryset = Page.objects.all()
+    serializer_class = PageSerializer
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            page = get_object_or_404(Page, pk=pk)
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+
+        pages = self.get_queryset().order_by("-created_at")
+        serializer = self.get_serializer(pages, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.has_perm("core.can_create_page"):
+            raise PermissionDenied("Você não tem permissão para criar páginas.")
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            page = serializer.save()
+            page.allowed_users.add(request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, *args, **kwargs):
+        page = get_object_or_404(Page, pk=pk)
+        if not (request.user.is_superuser or request.user in page.allowed_users.all()):
+            raise PermissionDenied("Você não tem permissão para editar esta página.")
+
+        serializer = self.get_serializer(page, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        page = get_object_or_404(Page, pk=pk)
+        if not (request.user.is_superuser or request.user in page.allowed_users.all()):
+            raise PermissionDenied("Você não tem permissão para excluir esta página.")
+
+        page.delete()
+        return Response(
+            {"message": f"Página {pk} excluída com sucesso."},
+            status=status.HTTP_204_NO_CONTENT,
+        )

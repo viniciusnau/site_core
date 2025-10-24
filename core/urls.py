@@ -19,7 +19,7 @@ from core.views import (
     TagView,
     TypeOfServiceView,
     UnitView,
-    WebsiteInformationView, CardRegisterView,
+    WebsiteInformationView, CardRegisterView, PageView,
 )
 
 urlpatterns = [
@@ -114,4 +114,6 @@ urlpatterns = [
     ),
     path("cards/", CardsView.as_view(), name="cards-list-create"),
     path("cards/<int:pk>/", CardsView.as_view(), name="cards-detail"),
+    path("page/", PageView.as_view(), name="page-list-create"),
+    path("page/<int:pk>/", PageView.as_view(), name="page-detail"),
 ]
