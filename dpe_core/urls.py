@@ -29,6 +29,7 @@ from core.views import (
     ContainerView,
     ServiceButtonsView,
     QuickAccessButtonsView,
+    CoresAndUnitView,
 )
 from dpe_core import settings
 
@@ -43,6 +44,8 @@ urlpatterns = [
     path("api/core/", CoreView.as_view(), name="core-list-create"),
     path("api/core/<int:pk>/", CoreView.as_view(), name="core-detail"),
     path("api/core/<int:pk>/units/", CoreUnitsView.as_view(), name="core-units"),
+    path("api/cores-units/", CoresAndUnitView.as_view(), name='cores-units-list'),
+
     path(
         "api/area-of-duty/", AreaOfDutyView.as_view(), name="area_of_duty-list-create"
     ),
