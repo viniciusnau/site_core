@@ -29,6 +29,7 @@ from core.views import (
     ContainerView,
     ServiceButtonsView,
     QuickAccessButtonsView,
+    HeaderView,
 )
 from dpe_core import settings
 
@@ -170,6 +171,9 @@ urlpatterns = [
 
     path('api/quick-access-buttons/', QuickAccessButtonsView.as_view(), name='quick_access_buttons-list-create'),
     path('api/quick-access-buttons/<int:pk>/', QuickAccessButtonsView.as_view(), name='quick_access_buttons-detail'),
+
+    path('api/header/', HeaderView.as_view(), name='header-list-create'),
+    path('api/header/<int:pk>/', HeaderView.as_view(), name='header-detail'),
 ]
 
 if settings.DEBUG:

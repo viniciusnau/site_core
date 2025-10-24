@@ -35,6 +35,7 @@ from core.models import (
     Container,
     ServiceButtons,
     QuickAccessButtons,
+    Header,
 )
 
 
@@ -535,3 +536,8 @@ class QuickAccessButtonsSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ["author", "created_at", "updated_at", "published_at"]
         
+class HeaderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Header
+        fields = ["id", "background_color", "name_color", "structure" ]
+        read_only_fields = ["author", "created_at", "updated_at", "published_at"]

@@ -6,7 +6,6 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.db.models import Q, F
 
-
 class BasePublishModel(models.Model):
     STATUS_CHOICES = [
         ("published", "Publicado"),
@@ -645,3 +644,11 @@ class Page(BasePublishModel):
 
     def __str__(self):
         return self.title
+
+class Header(BasePublishModel):
+    background_color = models.CharField(max_length=255, blank=True, null=True)
+    name_color = models.CharField(max_length=255, blank=True, null=True)
+    structure = models.JSONField()
+
+    def __str__(self):
+        return f"Header {self.id}"

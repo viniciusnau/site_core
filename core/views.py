@@ -35,6 +35,7 @@ from .models import (
     Container,
     ServiceButtons,
     QuickAccessButtons,
+    Header,
 )
 from .serializers import (
     AreaOfActivitySerializer,
@@ -61,6 +62,7 @@ from .serializers import (
     ContainerSerializer,
     ServiceButtonsSerializer,
     QuickAccessButtonsSerializer,
+    HeaderSerializer,
     )
 
 
@@ -570,7 +572,7 @@ class WebsiteInformationView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, *args, **kwargs):
-        website_information = WebsiteInformations.objects.first()
+        website_information, created = WebsiteInformations.objects.get_or_create(id=1)
         if not website_information:
             return Response(
                 {"error": "there is no information to edit"},
@@ -1340,3 +1342,38 @@ class QuickAccessButtonsView(generics.GenericAPIView):
         quick_access_buttons.delete()
         return Response(f"Quick access buttons {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
 
+class HeaderView(generics.GenericAPIView):
+    serializer_class = HeaderSerializer
+    queryset = Header.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        header = self.get_queryset()
+        serializer = self.get_serializer(header, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                serializer.save(author=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                if hasattr(e, "message_dict"):
+                    return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        header = get_object_or_404(Header, pk=pk)
+        serializer = self.get_serializer(header, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save(author=request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        header = get_object_or_404(Header, pk=pk)
+        header.delete()
+        return Response(f"Header {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
