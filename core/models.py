@@ -1,6 +1,8 @@
-from django.db import transaction
+from django.db import models, transaction
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
@@ -75,7 +77,6 @@ class CardRegister(BasePublishModel):
 
 class Core(BasePublishModel):
     core_name = models.TextField(blank=True, null=True)
-
     def __str__(self):
         return self.core_name
 
@@ -626,22 +627,10 @@ class Page(BasePublishModel):
     has_posters = models.BooleanField(default=False)
     has_cores = models.BooleanField(default=False)
     card = models.ForeignKey(
-        "Cards", on_delete=models.SET_NULL, null=True, blank=True
+        Cards, on_delete=models.SET_NULL, null=True, blank=True
     )
     category = models.ForeignKey(
-        "Category", on_delete=models.SET_NULL, null=True, blank=True
+        Category, on_delete=models.SET_NULL, null=True, blank=True
     )
-    allowed_users = models.ManyToManyField(
-        User,
-        blank=True,
-        related_name="manageable_pages",
-        verbose_name="Usuários com permissão para editar/excluir esta página",
-    )
-
-    class Meta:
-        permissions = [
-            ("can_create_page", "Pode criar páginas"),
-        ]
-
     def __str__(self):
         return self.title

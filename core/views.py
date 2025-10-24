@@ -61,6 +61,7 @@ from .serializers import (
     ContainerSerializer,
     ServiceButtonsSerializer,
     QuickAccessButtonsSerializer,
+    CoresAndUnitSerializer,
     )
 
 
@@ -132,6 +133,11 @@ class CoreView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         core = self.get_queryset().order_by('-created_at')
+
+        published_param = request.query_params.get("published")
+        if published_param and published_param.lower() == "true":
+            core = core.filter(status="published")
+        
         serializer = self.get_serializer(core, many=True)
         return Response(serializer.data)
 
@@ -182,6 +188,11 @@ class UnitView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         unit = self.get_queryset().order_by('-created_at')
+
+        published_param = request.query_params.get("published")
+        if published_param and published_param.lower() == "true":
+            unit = unit.filter(status="published")
+
         serializer = self.get_serializer(unit, many=True)
         return Response(serializer.data)
 
@@ -1339,4 +1350,19 @@ class QuickAccessButtonsView(generics.GenericAPIView):
         quick_access_buttons = get_object_or_404(QuickAccessButtons, pk=pk)
         quick_access_buttons.delete()
         return Response(f"Quick access buttons {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
+    
 
+class CoresAndUnitView(generics.GenericAPIView):
+    queryset = Core.objects.all()
+    serializer_class = CoresAndUnitSerializer
+
+    def get(self, request, *args, **kwargs):
+        cores_and_unit = self.get_queryset().order_by('-created_at')
+        cores_with_units = cores_and_unit.filter(units__isnull=False).distinct()
+        published_param = request.query_params.get("published")
+        
+        if published_param and published_param.lower() == "true":
+            cores_with_units = cores_with_units.filter(status="published")
+
+        serializer = self.get_serializer(cores_with_units, many=True)
+        return Response(serializer.data)
