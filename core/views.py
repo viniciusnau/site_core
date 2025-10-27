@@ -46,6 +46,7 @@ from .serializers import (
     CategorySerializer,
     ContainerSerializer,
     CoreSerializer,
+    CoresAndUnitSerializer,
     EmailWebsiteSerializer,
     FAQSerializer,
     NewsAttachmentSerializer,
@@ -1394,3 +1395,19 @@ class PageView(generics.GenericAPIView):
             {"message": f"Página {pk} excluída com sucesso."},
             status=status.HTTP_204_NO_CONTENT,
         )
+    
+
+class CoresAndUnitView(generics.GenericAPIView):
+    queryset = Core.objects.all()
+    serializer_class = CoresAndUnitSerializer
+
+    def get(self, request, *args, **kwargs):
+        cores_and_unit = self.get_queryset().order_by('-created_at')
+        cores_with_units = cores_and_unit.filter(units__isnull=False).distinct()
+        published_param = request.query_params.get("published")
+        
+        if published_param and published_param.lower() == "true":
+            cores_with_units = cores_with_units.filter(status="published")
+
+        serializer = self.get_serializer(cores_with_units, many=True)
+        return Response(serializer.data)
