@@ -538,3 +538,17 @@ class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = "__all__"
+
+
+class CoresAndUnitSerializer(serializers.ModelSerializer):
+    units = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Core
+        fields = "__all__"
+        read_only_fields = ["author", "created_at", "updated_at", "published_at"]
+
+    def get_units(self, obj):
+        published_units = obj.units.filter(status='published')
+        return UnitSerializer(published_units, many=True).data
+        
