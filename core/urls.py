@@ -4,6 +4,7 @@ from core.views import (
     AreaOfActivityView,
     AreaOfDutyView,
     AuthorsByModel,
+    CardRegisterView,
     CardsView,
     CoreUnitsView,
     CoreView,
@@ -12,6 +13,7 @@ from core.views import (
     NewsAttachmentView,
     NewsGalleryImageView,
     NewsView,
+    PageView,
     PopupIncrementClickView,
     PopupIncrementVisualizationView,
     PopupView,
@@ -19,7 +21,7 @@ from core.views import (
     TagView,
     TypeOfServiceView,
     UnitView,
-    WebsiteInformationView, CardRegisterView, PageView,
+    WebsiteInformationView,
 )
 
 urlpatterns = [
