@@ -6,7 +6,9 @@ from core.views import (
     AreaOfActivityView,
     AreaOfDutyView,
     AuthorsByModel,
+    BannerView,
     CategoryView,
+    ContainerView,
     CoreUnitsView,
     CoreView,
     EmailWebsiteView,
@@ -18,18 +20,23 @@ from core.views import (
     PopupIncrementVisualizationView,
     PopupView,
     PostersView,
+    QuickAccessButtonsView,
     RecordsView,
+    ServiceButtonsView,
     SocialMediaView,
     SubcategoryView,
     TagView,
     TypeOfServiceView,
     UnitView,
     WebsiteInformationView,
+<<<<<<< HEAD
     BannerView,
     ContainerView,
     ServiceButtonsView,
     QuickAccessButtonsView,
     CoresAndUnitView,
+=======
+>>>>>>> 4e38dd9a4bd8acbcb6b0769a8427222181f783cf
 )
 from dpe_core import settings
 

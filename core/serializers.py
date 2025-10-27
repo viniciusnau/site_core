@@ -1,40 +1,37 @@
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
 from django.utils.text import slugify
 from rest_framework import serializers
-from django.utils.text import slugify
-from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db.models import Q
+
 from core.models import (
     FAQ,
     AreaOfActivity,
     AreaOfDuty,
+    Banner,
+    CardRegister,
     Cards,
     Category,
     Contact,
+    Container,
     Core,
     Email,
     EmailWebsite,
     News,
     NewsAttachment,
     NewsGalleryImage,
+    Page,
     Popup,
     Posters,
+    QuickAccessButtons,
     Records,
+    ServiceButtons,
     SocialMedia,
     Subcategory,
-    Records,
-    Posters, 
-    Cards,
-    Banner,
     Tag,
     TypeOfService,
     Unit,
     UnitService,
-    WebsiteInformations, 
-    CardRegister,
-    Container,
-    ServiceButtons,
-    QuickAccessButtons,
+    WebsiteInformations,
 )
 
 
@@ -387,8 +384,6 @@ class SubcategorySerializer(serializers.ModelSerializer):
         read_only_fields = ["author", "created_at", "updated_at", "published_at"]
 
 
-
-
 class CategorySerializer(serializers.ModelSerializer):
     records_count = serializers.SerializerMethodField()
     subcategories = SubcategorySerializer(many=True, read_only=True)
@@ -492,7 +487,8 @@ class CardRegisterSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-       
+
+
 class BannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
@@ -515,12 +511,14 @@ class BannerSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         return self.save_instance(instance)
-    
+
+
 class ContainerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Container
         fields = "__all__"
         read_only_fields = ["author", "created_at", "updated_at", "published_at"]
+
 
 class ServiceButtonsSerializer(serializers.ModelSerializer):
     class Meta:

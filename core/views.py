@@ -1,11 +1,11 @@
 from django.apps import apps
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,43 +13,50 @@ from .models import (
     FAQ,
     AreaOfActivity,
     AreaOfDuty,
+    Banner,
+    CardRegister,
     Cards,
     Category,
+    Container,
     Core,
     EmailWebsite,
     News,
     NewsAttachment,
     NewsGalleryImage,
+    Page,
     Popup,
     Posters,
+    QuickAccessButtons,
     Records,
-    Banner,
+    ServiceButtons,
     SocialMedia,
     Subcategory,
     Tag,
     TypeOfService,
     Unit,
     UnitService,
-    WebsiteInformations, 
-    CardRegister,
-    Container,
-    ServiceButtons,
-    QuickAccessButtons,
+    WebsiteInformations,
 )
 from .serializers import (
     AreaOfActivitySerializer,
     AreaOfDutySerializer,
+    BannerSerializer,
+    CardRegisterSerializer,
     CardsSerializer,
     CategorySerializer,
+    ContainerSerializer,
     CoreSerializer,
     EmailWebsiteSerializer,
     FAQSerializer,
     NewsAttachmentSerializer,
     NewsGalleryImageSerializer,
     NewsSerializer,
+    PageSerializer,
     PopupSerializer,
     PostersSerializer,
+    QuickAccessButtonsSerializer,
     RecordsSerializer,
+    ServiceButtonsSerializer,
     SocialMediaSerializer,
     SubcategorySerializer,
     TagSerializer,
