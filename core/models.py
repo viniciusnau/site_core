@@ -261,8 +261,6 @@ class SocialMedia(BasePublishModel):
         ("instagram", "Instagram"),
         ("youtube", "YouTube"),
         ("linkedin", "LinkedIn"),
-        ("pinterest", "Pinterest"),
-        ("vimeo", "Vimeo"),
     ]
 
     network = models.CharField(max_length=20, choices=NETWORK_CHOICES, unique=True)
