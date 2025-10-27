@@ -5,6 +5,8 @@ from django.db.models import F, Q
 from django.utils import timezone
 from django.utils.text import slugify
 
+from accounts.models import Profile
+
 
 class BasePublishModel(models.Model):
     STATUS_CHOICES = [
@@ -629,7 +631,7 @@ class Page(BasePublishModel):
         "Category", on_delete=models.SET_NULL, null=True, blank=True
     )
     allowed_users = models.ManyToManyField(
-        User,
+        Profile,
         blank=True,
         related_name="manageable_pages",
         verbose_name="Usuários com permissão para editar/excluir esta página",

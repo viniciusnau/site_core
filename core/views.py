@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.models import Profile
 from .models import (
     FAQ,
     AreaOfActivity,
@@ -1370,7 +1371,8 @@ class PageView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             page = serializer.save()
-            page.allowed_users.add(request.user)
+            profile = Profile.objects.get(user=request.user)
+            page.allowed_users.add(profile)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

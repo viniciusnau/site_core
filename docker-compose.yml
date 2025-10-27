@@ -45,7 +45,6 @@ services:
     build: .
     container_name: SITE_SERVER
     command: sh -c "
-      yes | python manage.py makemigrations --merge &&
       python manage.py makemigrations &&
       python manage.py migrate &&
       python manage.py runserver 0.0.0.0:8000"

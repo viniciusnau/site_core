@@ -1,10 +1,11 @@
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
-from .views import GoogleLoginApi, GoogleLoginRedirectApi, MeView
+from .views import GoogleLoginApi, GoogleLoginRedirectApi, MeView, ProfilesView
 
 urlpatterns = [
     path("me/", MeView.as_view(), name="me"),
+    path("profiles/", ProfilesView.as_view(), name="profiles"),
     path(
         "google-redirect/",
         csrf_exempt(GoogleLoginRedirectApi.as_view()),
