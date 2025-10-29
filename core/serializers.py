@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.utils.text import slugify
 from rest_framework import serializers
 
+from accounts.models import Profile
 from accounts.serializers import ProfileSerializer
 from core.models import (
     FAQ,
@@ -537,6 +538,14 @@ class QuickAccessButtonsSerializer(serializers.ModelSerializer):
 
 class PageSerializer(serializers.ModelSerializer):
     allowed_users = ProfileSerializer(many=True, read_only=True)
+
+    allowed_users_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        write_only=True,
+        required=False,
+        source="allowed_users",
+        queryset=Profile.objects.all(),
+    )
 
     class Meta:
         model = Page
