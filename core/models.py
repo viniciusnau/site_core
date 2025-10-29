@@ -619,6 +619,7 @@ class Page(BasePublishModel):
         unique=True,
         error_messages={"unique": "Já existe uma página com este título."},
     )
+    path = models.TextField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)
     has_faq = models.BooleanField(default=False)
     has_news = models.BooleanField(default=False)

@@ -1366,8 +1366,15 @@ class PageView(generics.GenericAPIView):
         return Page.objects.filter(allowed_users__user=user).distinct()
 
     def get(self, request, pk=None, *args, **kwargs):
+        path = request.query_params.get("path")
+
         if pk:
             page = get_object_or_404(Page, pk=pk)
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+
+        if path:
+            page = get_object_or_404(Page, path=path)
             serializer = self.get_serializer(page)
             return Response(serializer.data)
 
