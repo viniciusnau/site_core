@@ -1360,6 +1360,9 @@ class PageView(generics.GenericAPIView):
         if not user.is_authenticated:
             return Page.objects.all()
 
+        if user.is_superuser:
+            return Page.objects.all()
+
         return Page.objects.filter(allowed_users__user=user).distinct()
 
     def get(self, request, pk=None, *args, **kwargs):
