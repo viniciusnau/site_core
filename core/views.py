@@ -1,69 +1,73 @@
 from django.apps import apps
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.models import Profile
 from .models import (
     FAQ,
     AreaOfActivity,
     AreaOfDuty,
+    Banner,
+    CardRegister,
     Cards,
     Category,
+    Container,
     Core,
     EmailWebsite,
     News,
     NewsAttachment,
     NewsGalleryImage,
+    Page,
     Popup,
     Posters,
+    QuickAccessButtons,
     Records,
-    Banner,
+    ServiceButtons,
     SocialMedia,
     Subcategory,
     Tag,
     TypeOfService,
     Unit,
     UnitService,
-    WebsiteInformations, 
-    CardRegister,
-    Container,
-    ServiceButtons,
-    QuickAccessButtons,
+    WebsiteInformations,
     Header,
 )
 from .serializers import (
     AreaOfActivitySerializer,
     AreaOfDutySerializer,
+    BannerSerializer,
+    CardRegisterSerializer,
     CardsSerializer,
     CategorySerializer,
+    ContainerSerializer,
     CoreSerializer,
+    CoresAndUnitSerializer,
     EmailWebsiteSerializer,
     FAQSerializer,
     NewsAttachmentSerializer,
     NewsGalleryImageSerializer,
     NewsSerializer,
+    PageSerializer,
     PopupSerializer,
     PostersSerializer,
+    QuickAccessButtonsSerializer,
     RecordsSerializer,
+    ServiceButtonsSerializer,
     SocialMediaSerializer,
     SubcategorySerializer,
     TagSerializer,
     TypeOfServiceSerializer,
     UnitSerializer,
-    WebsiteInformationsSerializer, 
-    CardRegisterSerializer,
-    BannerSerializer,
-    ContainerSerializer,
-    ServiceButtonsSerializer,
-    QuickAccessButtonsSerializer,
+    WebsiteInformationsSerializer,
     HeaderSerializer,
-    )
+)
 
 
 class FaqView(generics.GenericAPIView):
@@ -1342,6 +1346,75 @@ class QuickAccessButtonsView(generics.GenericAPIView):
         quick_access_buttons.delete()
         return Response(f"Quick access buttons {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
 
+
+class PageView(generics.GenericAPIView):
+    queryset = Page.objects.all()
+    serializer_class = PageSerializer
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            page = get_object_or_404(Page, pk=pk)
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+
+        pages = self.get_queryset().order_by("-created_at")
+        serializer = self.get_serializer(pages, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.has_perm("core.can_create_page"):
+            raise PermissionDenied("Você não tem permissão para criar páginas.")
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            page = serializer.save()
+            profile = Profile.objects.get(user=request.user)
+            page.allowed_users.add(profile)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, *args, **kwargs):
+        page = get_object_or_404(Page, pk=pk)
+        if not (request.user.is_superuser or request.user in page.allowed_users.all()):
+            raise PermissionDenied("Você não tem permissão para editar esta página.")
+
+        serializer = self.get_serializer(page, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        page = get_object_or_404(Page, pk=pk)
+        if not (request.user.is_superuser or request.user in page.allowed_users.all()):
+            raise PermissionDenied("Você não tem permissão para excluir esta página.")
+
+        page.delete()
+        return Response(
+            {"message": f"Página {pk} excluída com sucesso."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+    
+
+class CoresAndUnitView(generics.GenericAPIView):
+    queryset = Core.objects.all()
+    serializer_class = CoresAndUnitSerializer
+
+    def get(self, request, *args, **kwargs):
+        cores_and_unit = self.get_queryset().order_by('-created_at')
+        cores_with_units = cores_and_unit.filter(units__isnull=False).distinct()
+        published_param = request.query_params.get("published")
+        
+        if published_param and published_param.lower() == "true":
+            cores_with_units = cores_with_units.filter(status="published")
+
+        serializer = self.get_serializer(cores_with_units, many=True)
+        return Response(serializer.data)
 class HeaderView(generics.GenericAPIView):
     serializer_class = HeaderSerializer
     queryset = Header.objects.all()

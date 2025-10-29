@@ -23,6 +23,15 @@ class MeView(APIView):
         return Response({"results": serializer.data})
 
 
+class ProfilesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = Profile.objects.all()
+        serializer = ProfileSerializer(profile, many=True)
+        return Response({"results": serializer.data})
+
+
 class PublicApi(APIView):
     authentication_classes = ()
     permission_classes = ()

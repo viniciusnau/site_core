@@ -1,10 +1,11 @@
-from django.db import transaction
 from django.contrib.auth.models import User
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.db.models import F, Q
 from django.utils import timezone
 from django.utils.text import slugify
-from django.core.exceptions import ValidationError
-from django.db.models import Q, F
+
+from accounts.models import Profile
 
 class BasePublishModel(models.Model):
     STATUS_CHOICES = [
@@ -261,8 +262,6 @@ class SocialMedia(BasePublishModel):
         ("instagram", "Instagram"),
         ("youtube", "YouTube"),
         ("linkedin", "LinkedIn"),
-        ("pinterest", "Pinterest"),
-        ("vimeo", "Vimeo"),
     ]
 
     network = models.CharField(max_length=20, choices=NETWORK_CHOICES, unique=True)
@@ -631,7 +630,7 @@ class Page(BasePublishModel):
         "Category", on_delete=models.SET_NULL, null=True, blank=True
     )
     allowed_users = models.ManyToManyField(
-        User,
+        Profile,
         blank=True,
         related_name="manageable_pages",
         verbose_name="Usuários com permissão para editar/excluir esta página",
