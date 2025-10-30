@@ -562,3 +562,9 @@ class CoresAndUnitSerializer(serializers.ModelSerializer):
     def get_units(self, obj):
         published_units = obj.units.filter(status='published')
         return UnitSerializer(published_units, many=True).data
+    
+class HeaderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Header
+        fields = ["id", "background_color", "name_color", "structure" ]
+        read_only_fields = ["author", "created_at", "updated_at", "published_at"]
