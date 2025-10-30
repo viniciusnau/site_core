@@ -551,4 +551,3 @@ class CoresAndUnitSerializer(serializers.ModelSerializer):
     def get_units(self, obj):
         published_units = obj.units.filter(status='published')
         return UnitSerializer(published_units, many=True).data
-        

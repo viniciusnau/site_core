@@ -12,6 +12,7 @@ from core.views import (
     FaqView,
     NewsAttachmentView,
     NewsGalleryImageView,
+    NewsPaginationView,
     NewsView,
     PageView,
     PopupIncrementClickView,
@@ -90,7 +91,7 @@ urlpatterns = [
     path(
         "authors/<str:model_name>/", AuthorsByModel.as_view(), name="authors-by-model"
     ),
-    path("news/", NewsView.as_view(), name="news-list-create"),
+    path("news/", NewsPaginationView.as_view(), name="news-list-create"),
     path("news/<int:pk>/", NewsView.as_view(), name="news-detail"),
     path("news/<slug:slug>/", NewsView.as_view(), name="news-detail"),
     path("card-register/", CardRegisterView.as_view(), name="card_register-list-create"),
