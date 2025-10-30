@@ -8,10 +8,9 @@ from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
-
 
 from accounts.models import Profile
+
 from .models import (
     FAQ,
     AreaOfActivity,
@@ -23,6 +22,7 @@ from .models import (
     Container,
     Core,
     EmailWebsite,
+    Header,
     News,
     NewsAttachment,
     NewsGalleryImage,
@@ -39,7 +39,6 @@ from .models import (
     Unit,
     UnitService,
     WebsiteInformations,
-    Header,
 )
 from .serializers import (
     AreaOfActivitySerializer,
@@ -49,10 +48,11 @@ from .serializers import (
     CardsSerializer,
     CategorySerializer,
     ContainerSerializer,
-    CoreSerializer,
     CoresAndUnitSerializer,
+    CoreSerializer,
     EmailWebsiteSerializer,
     FAQSerializer,
+    HeaderSerializer,
     NewsAttachmentSerializer,
     NewsGalleryImageSerializer,
     NewsSerializer,
@@ -68,7 +68,6 @@ from .serializers import (
     TypeOfServiceSerializer,
     UnitSerializer,
     WebsiteInformationsSerializer,
-    HeaderSerializer,
 )
 
 
@@ -1434,77 +1433,7 @@ class CoresAndUnitView(generics.GenericAPIView):
 
         serializer = self.get_serializer(cores_with_units, many=True)
         return Response(serializer.data)
-    
 
-class NewsPaginationView(generics.GenericAPIView):
-    serializer_class = NewsSerializer
-    queryset = News.objects.all()
-    pagination_class = PageNumberPagination
-    pagination_class.page_size = 10
-    lookup_field = "slug"
-
-    def get_permissions(self):
-        if self.request.method in ["GET"]:
-            return [AllowAny()]
-        return [IsAdminUser()]
-
-    def get(self, request, *args, **kwargs):
-        slug = kwargs.get("slug")
-        if slug:
-            news = get_object_or_404(News, slug=slug)
-            serializer = self.get_serializer(news)
-            return Response(serializer.data)
-
-        news = self.get_queryset().order_by('-created_at')
-        now = timezone.now()
-        News.objects.filter(status="scheduled", published_at__lte=now).update(
-            status="published"
-        )
-
-        published_param = request.query_params.get("published")
-        if published_param is not None and published_param.lower() == "true":
-            news = news.filter(status="published", published_at__lte=now)
-
-        page = self.paginate_queryset(news)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(news, many=True)
-        return Response(serializer.data)
-    
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                serializer.save(author=request.user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except ValidationError as e:
-                if hasattr(e, "message_dict"):
-                    return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
-                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def patch(self, request, pk, *args, **kwargs):
-        news = get_object_or_404(News, pk=pk)
-        serializer = self.get_serializer(news, data=request.data, partial=True)
-        if serializer.is_valid():
-            try:
-                serializer.save(author=request.user)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except ValidationError as e:
-                if hasattr(e, "message_dict"):
-                    return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
-                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, *args, **kwargs):
-        news = get_object_or_404(News, pk=pk)
-
-        news.delete()
-        return Response(
-            f"News {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT
-        )
     
 class HeaderView(generics.GenericAPIView):
     serializer_class = HeaderSerializer

@@ -7,6 +7,7 @@ from django.utils.text import slugify
 
 from accounts.models import Profile
 
+
 class BasePublishModel(models.Model):
     STATUS_CHOICES = [
         ("published", "Publicado"),

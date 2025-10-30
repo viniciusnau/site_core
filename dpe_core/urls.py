@@ -9,11 +9,12 @@ from core.views import (
     BannerView,
     CategoryView,
     ContainerView,
-    CoreUnitsView,
     CoresAndUnitView,
+    CoreUnitsView,
     CoreView,
     EmailWebsiteView,
     FaqView,
+    HeaderView,
     NewsAttachmentView,
     NewsGalleryImageView,
     NewsView,
@@ -30,7 +31,6 @@ from core.views import (
     TypeOfServiceView,
     UnitView,
     WebsiteInformationView,
-    HeaderView,
 )
 from dpe_core import settings
 
