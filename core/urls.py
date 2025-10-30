@@ -31,6 +31,7 @@ from core.views import (
     TypeOfServiceView,
     UnitView,
     WebsiteInformationView,
+    CoresAndUnitView,
 )
 
 urlpatterns = [
@@ -41,6 +42,7 @@ urlpatterns = [
     path("core/", CoreView.as_view(), name="core-list-create"),
     path("core/<int:pk>/", CoreView.as_view(), name="core-detail"),
     path("core/<int:pk>/units/", CoreUnitsView.as_view(), name="core-units"),
+    path("cores-units/", CoresAndUnitView.as_view(), name='cores-units-list'),
     path("area-of-duty/", AreaOfDutyView.as_view(), name="area_of_duty-list-create"),
     path(
         "area-of-duty/<int:pk>/", AreaOfDutyView.as_view(), name="area_of_duty-detail"
