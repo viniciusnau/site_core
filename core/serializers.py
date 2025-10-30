@@ -374,13 +374,12 @@ class RecordsSerializer(serializers.ModelSerializer):
 class SubcategorySerializer(serializers.ModelSerializer):
     category_title = serializers.CharField(source="category.title", read_only=True)
     sub_category_title = serializers.CharField(
-        source='sub_category.title',
+        source="sub_category.title",
         read_only=True,
         allow_null=True,
     )
     records = RecordsSerializer(many=True, read_only=True)
 
-    
     class Meta:
         model = Subcategory
         fields = "__all__"
@@ -437,8 +436,7 @@ class CardsSerializer(serializers.ModelSerializer):
 class CardRegisterSerializer(serializers.ModelSerializer):
     remove_image = serializers.BooleanField(write_only=True, required=False)
     card = serializers.PrimaryKeyRelatedField(
-        queryset=Cards.objects.all(),
-        write_only=True
+        queryset=Cards.objects.all(), write_only=True
     )
     card_detail = CardsSerializer(source="card", read_only=True)
     related_cards = serializers.SerializerMethodField(read_only=True)
@@ -448,20 +446,19 @@ class CardRegisterSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             "image": {
-                "error_messages": {
-                    "invalid_image": "Apenas arquivos de imagens."
-                }
+                "error_messages": {"invalid_image": "Apenas arquivos de imagens."}
             }
         }
 
     def get_related_cards(self, obj):
         queryset = (
-            CardRegister.objects
-            .filter(card=obj.card)
+            CardRegister.objects.filter(card=obj.card)
             .exclude(id=obj.id)
             .order_by("-id")[:3]
         )
-        return CardRegisterMiniSerializer(queryset, many=True, context=self.context).data
+        return CardRegisterMiniSerializer(
+            queryset, many=True, context=self.context
+        ).data
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -495,8 +492,8 @@ class CardRegisterSerializer(serializers.ModelSerializer):
 class BannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
-        fields = '__all__'
-        read_only_fields = ['author', 'created_at', 'updated_at', 'published_at']
+        fields = "__all__"
+        read_only_fields = ["author", "created_at", "updated_at", "published_at"]
 
     def save_instance(self, instance):
         try:
@@ -562,12 +559,12 @@ class CoresAndUnitSerializer(serializers.ModelSerializer):
         read_only_fields = ["author", "created_at", "updated_at", "published_at"]
 
     def get_units(self, obj):
-        published_units = obj.units.filter(status='published')
+        published_units = obj.units.filter(status="published")
         return UnitSerializer(published_units, many=True).data
 
 
 class HeaderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Header
-        fields = ["id", "background_color", "name_color", "structure" ]
+        fields = ["id", "background_color", "name_color", "structure"]
         read_only_fields = ["author", "created_at", "updated_at", "published_at"]

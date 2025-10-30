@@ -45,7 +45,7 @@ urlpatterns = [
     path("api/core/", CoreView.as_view(), name="core-list-create"),
     path("api/core/<int:pk>/", CoreView.as_view(), name="core-detail"),
     path("api/core/<int:pk>/units/", CoreUnitsView.as_view(), name="core-units"),
-    path("api/cores-units/", CoresAndUnitView.as_view(), name='cores-units-list'),   
+    path("api/cores-units/", CoresAndUnitView.as_view(), name="cores-units-list"),
     path(
         "api/area-of-duty/", AreaOfDutyView.as_view(), name="area_of_duty-list-create"
     ),
@@ -161,21 +161,32 @@ urlpatterns = [
     path("api/posters/", PostersView.as_view(), name="posters-list-create"),
     path("api/posters/<int:pk>/", PostersView.as_view(), name="posters-detail"),
     path("api/posters/<slug:slug>/", PostersView.as_view(), name="posters-datail-slug"),
-
-    path('api/banner/', BannerView.as_view(), name='banner-list-create'),
-    path('api/banner/<int:pk>/', BannerView.as_view(), name='banner-detail'),
-
-    path('api/container/', ContainerView.as_view(), name='container-list-create'),
-    path('api/container/<int:pk>/', ContainerView.as_view(), name='container-detail'),
-
-    path('api/service-buttons/', ServiceButtonsView.as_view(), name='service_buttons-list-create'),
-    path('api/service-buttons/<int:pk>/', ServiceButtonsView.as_view(), name='service_buttons-detail'),
-
-    path('api/quick-access-buttons/', QuickAccessButtonsView.as_view(), name='quick_access_buttons-list-create'),
-    path('api/quick-access-buttons/<int:pk>/', QuickAccessButtonsView.as_view(), name='quick_access_buttons-detail'),
-
-    path('api/header/', HeaderView.as_view(), name='header-list-create'),
-    path('api/header/<int:pk>/', HeaderView.as_view(), name='header-detail'),
+    path("api/banner/", BannerView.as_view(), name="banner-list-create"),
+    path("api/banner/<int:pk>/", BannerView.as_view(), name="banner-detail"),
+    path("api/container/", ContainerView.as_view(), name="container-list-create"),
+    path("api/container/<int:pk>/", ContainerView.as_view(), name="container-detail"),
+    path(
+        "api/service-buttons/",
+        ServiceButtonsView.as_view(),
+        name="service_buttons-list-create",
+    ),
+    path(
+        "api/service-buttons/<int:pk>/",
+        ServiceButtonsView.as_view(),
+        name="service_buttons-detail",
+    ),
+    path(
+        "api/quick-access-buttons/",
+        QuickAccessButtonsView.as_view(),
+        name="quick_access_buttons-list-create",
+    ),
+    path(
+        "api/quick-access-buttons/<int:pk>/",
+        QuickAccessButtonsView.as_view(),
+        name="quick_access_buttons-detail",
+    ),
+    path("api/header/", HeaderView.as_view(), name="header-list-create"),
+    path("api/header/<int:pk>/", HeaderView.as_view(), name="header-detail"),
 ]
 
 if settings.DEBUG:

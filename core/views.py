@@ -89,11 +89,11 @@ class FaqView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         faqs = self.get_queryset()
-        
+
         published_param = request.query_params.get("published")
         if published_param and published_param.lower() == "true":
             faqs = faqs.filter(status="published")
-        faqs = faqs.order_by('-created_at')
+        faqs = faqs.order_by("-created_at")
 
         serializer = self.get_serializer(faqs, many=True)
         return Response(serializer.data)
@@ -137,7 +137,7 @@ class CoreView(generics.GenericAPIView):
         return [IsAdminUser()]
 
     def get(self, request, *args, **kwargs):
-        core = self.get_queryset().order_by('-created_at')
+        core = self.get_queryset().order_by("-created_at")
         serializer = self.get_serializer(core, many=True)
         return Response(serializer.data)
 
@@ -187,7 +187,7 @@ class UnitView(generics.GenericAPIView):
         return [IsAdminUser()]
 
     def get(self, request, *args, **kwargs):
-        unit = self.get_queryset().order_by('-created_at')
+        unit = self.get_queryset().order_by("-created_at")
         serializer = self.get_serializer(unit, many=True)
         return Response(serializer.data)
 
@@ -278,7 +278,7 @@ class AreaOfDutyView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
-        duty = self.get_queryset().order_by('-created_at')
+        duty = self.get_queryset().order_by("-created_at")
         serializer = self.get_serializer(duty, many=True)
         return Response(serializer.data)
 
@@ -321,7 +321,7 @@ class TypeOfServiceView(generics.GenericAPIView):
         return [IsAdminUser()]
 
     def get(self, request, *args, **kwargs):
-        type_of_service = self.get_queryset().order_by('-created_at')
+        type_of_service = self.get_queryset().order_by("-created_at")
         serializer = self.get_serializer(type_of_service, many=True)
         return Response(serializer.data)
 
@@ -449,7 +449,7 @@ class TagView(generics.GenericAPIView):
         return [IsAdminUser()]
 
     def get(self, request, *args, **kwargs):
-        tag = self.get_queryset().order_by('-created_at')
+        tag = self.get_queryset().order_by("-created_at")
         serializer = self.get_serializer(tag, many=True)
         return Response(serializer.data)
 
@@ -737,7 +737,7 @@ class NewsView(generics.GenericAPIView):
             serializer = self.get_serializer(news)
             return Response(serializer.data)
 
-        news = self.get_queryset().order_by('-created_at')
+        news = self.get_queryset().order_by("-created_at")
         now = timezone.now()
         News.objects.filter(status="scheduled", published_at__lte=now).update(
             status="published"
@@ -925,7 +925,7 @@ class CategoryView(generics.GenericAPIView):
                     {"error": "IDs devem ser números separados por vírgula"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        queryset = queryset.order_by('-created_at')
+        queryset = queryset.order_by("-created_at")
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -973,8 +973,8 @@ class SubcategoryView(generics.GenericAPIView):
             sub_category = get_object_or_404(Subcategory, pk=pk)
             serializer = self.get_serializer(sub_category)
         else:
-            
-            sub_category = self.get_queryset().order_by('-created_at')
+
+            sub_category = self.get_queryset().order_by("-created_at")
             serializer = self.get_serializer(sub_category, many=True)
         return Response(serializer.data)
 
@@ -1018,7 +1018,7 @@ class RecordsView(generics.GenericAPIView):
         return [IsAdminUser()]
 
     def get(self, request, *args, **kwargs):
-        records = self.get_queryset().order_by('-created_at')
+        records = self.get_queryset().order_by("-created_at")
         serializer = self.get_serializer(records, many=True)
         return Response(serializer.data)
 
@@ -1066,7 +1066,7 @@ class PostersView(generics.GenericAPIView):
             poster = get_object_or_404(Posters, slug=slug)
             serializer = self.get_serializer(poster)
             return Response(serializer.data)
-        posters = self.get_queryset().order_by('-created_at')
+        posters = self.get_queryset().order_by("-created_at")
         serializer = self.get_serializer(posters, many=True)
         return Response(serializer.data)
 
@@ -1205,9 +1205,11 @@ class CardRegisterView(generics.GenericAPIView):
         card_register = get_object_or_404(CardRegister, pk=pk)
         card_register.delete()
         return Response(
-            f"CardRegister {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT
+            f"CardRegister {pk} was deleted successfully",
+            status=status.HTTP_204_NO_CONTENT,
         )
-   
+
+
 class BannerView(generics.GenericAPIView):
     serializer_class = BannerSerializer
     queryset = Banner.objects.all()
@@ -1225,7 +1227,9 @@ class BannerView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             banner = serializer.save(author=request.user)
-            return Response(self.get_serializer(banner).data, status=status.HTTP_201_CREATED)
+            return Response(
+                self.get_serializer(banner).data, status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, *args, **kwargs):
@@ -1241,8 +1245,11 @@ class BannerView(generics.GenericAPIView):
         pk = kwargs.get("pk")
         banner = get_object_or_404(Banner, pk=pk)
         banner.delete()
-        return Response(f"Banner {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
-    
+        return Response(
+            f"Banner {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT
+        )
+
+
 class ContainerView(generics.GenericAPIView):
     serializer_class = ContainerSerializer
     queryset = Container.objects.all()
@@ -1256,7 +1263,9 @@ class ContainerView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             containers = serializer.save(author=request.user)
-            return Response(self.get_serializer(containers).data, status=status.HTTP_201_CREATED)
+            return Response(
+                self.get_serializer(containers).data, status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, *args, **kwargs):
@@ -1272,8 +1281,12 @@ class ContainerView(generics.GenericAPIView):
         pk = kwargs.get("pk")
         containers = get_object_or_404(Container, pk=pk)
         containers.delete()
-        return Response(f"Container {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
-    
+        return Response(
+            f"Container {pk} was deleted successfully",
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+
 class ServiceButtonsView(generics.GenericAPIView):
     serializer_class = ServiceButtonsSerializer
     queryset = ServiceButtons.objects.all()
@@ -1298,7 +1311,9 @@ class ServiceButtonsView(generics.GenericAPIView):
     def patch(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         services_buttons = get_object_or_404(ServiceButtons, pk=pk)
-        serializer = self.get_serializer(services_buttons, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            services_buttons, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save(author=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1308,7 +1323,11 @@ class ServiceButtonsView(generics.GenericAPIView):
         pk = kwargs.get("pk")
         services_buttons = get_object_or_404(ServiceButtons, pk=pk)
         services_buttons.delete()
-        return Response(f"Service buttons {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            f"Service buttons {pk} was deleted successfully",
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
 
 class QuickAccessButtonsView(generics.GenericAPIView):
     serializer_class = QuickAccessButtonsSerializer
@@ -1334,7 +1353,9 @@ class QuickAccessButtonsView(generics.GenericAPIView):
     def patch(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         quick_access_buttons = get_object_or_404(QuickAccessButtons, pk=pk)
-        serializer = self.get_serializer(quick_access_buttons, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            quick_access_buttons, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save(author=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1344,7 +1365,10 @@ class QuickAccessButtonsView(generics.GenericAPIView):
         pk = kwargs.get("pk")
         quick_access_buttons = get_object_or_404(QuickAccessButtons, pk=pk)
         quick_access_buttons.delete()
-        return Response(f"Quick access buttons {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            f"Quick access buttons {pk} was deleted successfully",
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 
 class PageView(generics.GenericAPIView):
@@ -1417,24 +1441,24 @@ class PageView(generics.GenericAPIView):
             {"message": f"Página {pk} excluída com sucesso."},
             status=status.HTTP_204_NO_CONTENT,
         )
-    
+
 
 class CoresAndUnitView(generics.GenericAPIView):
     queryset = Core.objects.all()
     serializer_class = CoresAndUnitSerializer
 
     def get(self, request, *args, **kwargs):
-        cores_and_unit = self.get_queryset().order_by('-created_at')
+        cores_and_unit = self.get_queryset().order_by("-created_at")
         cores_with_units = cores_and_unit.filter(units__isnull=False).distinct()
         published_param = request.query_params.get("published")
-        
+
         if published_param and published_param.lower() == "true":
             cores_with_units = cores_with_units.filter(status="published")
 
         serializer = self.get_serializer(cores_with_units, many=True)
         return Response(serializer.data)
 
-    
+
 class HeaderView(generics.GenericAPIView):
     serializer_class = HeaderSerializer
     queryset = Header.objects.all()
@@ -1443,7 +1467,7 @@ class HeaderView(generics.GenericAPIView):
         header = self.get_queryset()
         serializer = self.get_serializer(header, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -1455,7 +1479,7 @@ class HeaderView(generics.GenericAPIView):
                     return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
                 return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def patch(self, request, *args, **kwargs):
         header = Header.objects.first()
         if header:
@@ -1471,9 +1495,10 @@ class HeaderView(generics.GenericAPIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
     def delete(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         header = get_object_or_404(Header, pk=pk)
         header.delete()
-        return Response(f"Header {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            f"Header {pk} was deleted successfully", status=status.HTTP_204_NO_CONTENT
+        )

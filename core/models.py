@@ -54,7 +54,9 @@ class Cards(BasePublishModel):
 
 
 class CardRegister(BasePublishModel):
-    card = models.ForeignKey(Cards, on_delete=models.CASCADE, null=False, related_name="registers")
+    card = models.ForeignKey(
+        Cards, on_delete=models.CASCADE, null=False, related_name="registers"
+    )
     title = models.CharField(
         max_length=255,
         unique=True,
@@ -373,8 +375,9 @@ class Subcategory(BasePublishModel):
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="subcategories"
     )
-    sub_category = models.ForeignKey('self', null=True, blank=True, 
-                                    related_name='children', on_delete=models.CASCADE)
+    sub_category = models.ForeignKey(
+        "self", null=True, blank=True, related_name="children", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.title
@@ -445,7 +448,7 @@ class Banner(BasePublishModel):
             models.UniqueConstraint(
                 fields=["group"],
                 condition=models.Q(group="footer_banner"),
-                name="unique_footer_banner"
+                name="unique_footer_banner",
             )
         ]
 
@@ -453,15 +456,18 @@ class Banner(BasePublishModel):
         if self.group == "slides":
             with transaction.atomic():
                 Banner.objects.filter(
-                    group="slides",
-                    position__gt=self.position
+                    group="slides", position__gt=self.position
                 ).update(position=F("position") - 1)
         super().delete(*args, **kwargs)
 
     def clean(self):
         super().clean()
         if self.group == "footer_banner":
-            exists = Banner.objects.exclude(pk=self.pk).filter(group="footer_banner").exists()
+            exists = (
+                Banner.objects.exclude(pk=self.pk)
+                .filter(group="footer_banner")
+                .exists()
+            )
             if exists:
                 raise ValidationError("Já existe um banner no rodapé.")
 
@@ -474,8 +480,7 @@ class Banner(BasePublishModel):
             with transaction.atomic():
                 if not self.pk:
                     Banner.objects.filter(
-                        group="slides",
-                        position__gte=self.position
+                        group="slides", position__gte=self.position
                     ).update(position=F("position") + 1)
                 else:
                     old_position = Banner.objects.get(pk=self.pk).position
@@ -483,20 +488,21 @@ class Banner(BasePublishModel):
                         Banner.objects.filter(
                             group="slides",
                             position__gt=old_position,
-                            position__lte=self.position
+                            position__lte=self.position,
                         ).update(position=F("position") - 1)
                     elif old_position > self.position:
                         Banner.objects.filter(
                             group="slides",
                             position__gte=self.position,
-                            position__lt=old_position
+                            position__lt=old_position,
                         ).update(position=F("position") + 1)
 
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.alt or "Banner sem descrição"
-    
+
+
 class Container(BasePublishModel):
     show_title = models.BooleanField(default=False)
     title = models.CharField(max_length=255, default="Título Padrão")
@@ -506,7 +512,8 @@ class Container(BasePublishModel):
 
     def __str__(self):
         return self.title
-    
+
+
 class ServiceButtons(BasePublishModel):
     image = models.ImageField(upload_to="service/images/")
     title = models.CharField(max_length=255)
@@ -516,12 +523,10 @@ class ServiceButtons(BasePublishModel):
 
     def clean(self):
         super().clean()
-        count = (
-            ServiceButtons.objects.exclude(pk=self.pk).filter().count()
-        )
+        count = ServiceButtons.objects.exclude(pk=self.pk).filter().count()
         if count >= 3:
             raise ValidationError("Já existem 3 botões.")
-        
+
     def save(self, *args, **kwargs):
         self.full_clean()
         if not self.position or self.position < 1:
@@ -529,26 +534,25 @@ class ServiceButtons(BasePublishModel):
 
         with transaction.atomic():
             if not self.pk:
-                ServiceButtons.objects.filter(
-                    position__gte=self.position
-                ).update(position=F("position") + 1)
+                ServiceButtons.objects.filter(position__gte=self.position).update(
+                    position=F("position") + 1
+                )
             else:
                 old_position = ServiceButtons.objects.get(pk=self.pk).position
                 if old_position < self.position:
                     ServiceButtons.objects.filter(
-                        position__gt=old_position,
-                        position__lte=self.position
+                        position__gt=old_position, position__lte=self.position
                     ).update(position=F("position") - 1)
                 elif old_position > self.position:
                     ServiceButtons.objects.filter(
-                        position__gte=self.position,
-                        position__lt=old_position
+                        position__gte=self.position, position__lt=old_position
                     ).update(position=F("position") + 1)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
-    
+
+
 class QuickAccessButtons(BasePublishModel):
     GROUP_CHOICES = [
         ("above_group", "Parte superior"),
@@ -564,12 +568,16 @@ class QuickAccessButtons(BasePublishModel):
     link = models.CharField(max_length=255)
 
     def clean(self):
-        if QuickAccessButtons.objects.exclude(pk=self.pk).filter(group=self.group).count() >= 6:
+        if (
+            QuickAccessButtons.objects.exclude(pk=self.pk)
+            .filter(group=self.group)
+            .count()
+            >= 6
+        ):
             raise ValidationError(
                 f"Atingiu o limite máximo de Botões no grupo: {self.get_group_display()}"
             )
 
-    
     def save(self, *args, **kwargs):
         self.full_clean()
 
@@ -579,32 +587,29 @@ class QuickAccessButtons(BasePublishModel):
         with transaction.atomic():
             if not self.pk:
                 QuickAccessButtons.objects.filter(
-                    group=self.group,
-                    position__gte=self.position
+                    group=self.group, position__gte=self.position
                 ).update(position=F("position") + 1)
             else:
                 old = QuickAccessButtons.objects.get(pk=self.pk)
                 if old.group != self.group:
                     QuickAccessButtons.objects.filter(
-                        group=old.group,
-                        position__gt=old.position
+                        group=old.group, position__gt=old.position
                     ).update(position=F("position") - 1)
                     QuickAccessButtons.objects.filter(
-                        group=self.group,
-                        position__gte=self.position
+                        group=self.group, position__gte=self.position
                     ).update(position=F("position") + 1)
                 elif old.position != self.position:
                     if old.position < self.position:
                         QuickAccessButtons.objects.filter(
                             group=self.group,
                             position__gt=old.position,
-                            position__lte=self.position
+                            position__lte=self.position,
                         ).update(position=F("position") - 1)
                     else:
                         QuickAccessButtons.objects.filter(
                             group=self.group,
                             position__gte=self.position,
-                            position__lt=old.position
+                            position__lt=old.position,
                         ).update(position=F("position") + 1)
 
         super().save(*args, **kwargs)
@@ -625,9 +630,7 @@ class Page(BasePublishModel):
     has_news = models.BooleanField(default=False)
     has_posters = models.BooleanField(default=False)
     has_cores = models.BooleanField(default=False)
-    card = models.ForeignKey(
-        "Cards", on_delete=models.SET_NULL, null=True, blank=True
-    )
+    card = models.ForeignKey("Cards", on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(
         "Category", on_delete=models.SET_NULL, null=True, blank=True
     )
@@ -645,6 +648,7 @@ class Page(BasePublishModel):
 
     def __str__(self):
         return self.title
+
 
 class Header(BasePublishModel):
     background_color = models.CharField(max_length=255, blank=True, null=True)
