@@ -1437,13 +1437,20 @@ class HeaderView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self, request, *args, **kwargs):
-        pk = kwargs.get("pk")
-        header = get_object_or_404(Header, pk=pk)
-        serializer = self.get_serializer(header, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save(author=request.user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        header = Header.objects.first()
+        if header:
+            serializer = self.get_serializer(header, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(author=request.user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(author=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
     def delete(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
