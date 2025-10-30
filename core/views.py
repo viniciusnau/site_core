@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 
 
+from accounts.models import Profile
 from .models import (
     FAQ,
     AreaOfActivity,
@@ -38,6 +39,7 @@ from .models import (
     Unit,
     UnitService,
     WebsiteInformations,
+    Header,
 )
 from .serializers import (
     AreaOfActivitySerializer,
@@ -66,6 +68,7 @@ from .serializers import (
     TypeOfServiceSerializer,
     UnitSerializer,
     WebsiteInformationsSerializer,
+    HeaderSerializer,
 )
 
 
@@ -574,7 +577,7 @@ class WebsiteInformationView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, *args, **kwargs):
-        website_information = WebsiteInformations.objects.first()
+        website_information, created = WebsiteInformations.objects.get_or_create(id=1)
         if not website_information:
             return Response(
                 {"error": "there is no information to edit"},
@@ -1354,9 +1357,27 @@ class PageView(generics.GenericAPIView):
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    def get_queryset(self):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return Page.objects.all()
+
+        if user.is_superuser:
+            return Page.objects.all()
+
+        return Page.objects.filter(allowed_users__user=user).distinct()
+
     def get(self, request, pk=None, *args, **kwargs):
+        path = request.query_params.get("path")
+
         if pk:
             page = get_object_or_404(Page, pk=pk)
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+
+        if path:
+            page = get_object_or_404(Page, path=path)
             serializer = self.get_serializer(page)
             return Response(serializer.data)
 
@@ -1371,7 +1392,8 @@ class PageView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             page = serializer.save()
-            page.allowed_users.add(request.user)
+            profile = Profile.objects.get(user=request.user)
+            page.allowed_users.add(profile)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

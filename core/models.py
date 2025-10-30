@@ -5,6 +5,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 from django.utils.text import slugify
 
+from accounts.models import Profile
 
 class BasePublishModel(models.Model):
     STATUS_CHOICES = [
@@ -617,6 +618,7 @@ class Page(BasePublishModel):
         unique=True,
         error_messages={"unique": "Já existe uma página com este título."},
     )
+    path = models.TextField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)
     has_faq = models.BooleanField(default=False)
     has_news = models.BooleanField(default=False)
@@ -629,7 +631,7 @@ class Page(BasePublishModel):
         "Category", on_delete=models.SET_NULL, null=True, blank=True
     )
     allowed_users = models.ManyToManyField(
-        User,
+        Profile,
         blank=True,
         related_name="manageable_pages",
         verbose_name="Usuários com permissão para editar/excluir esta página",
@@ -642,3 +644,11 @@ class Page(BasePublishModel):
 
     def __str__(self):
         return self.title
+
+class Header(BasePublishModel):
+    background_color = models.CharField(max_length=255, blank=True, null=True)
+    name_color = models.CharField(max_length=255, blank=True, null=True)
+    structure = models.JSONField()
+
+    def __str__(self):
+        return f"Header {self.id}"
