@@ -69,6 +69,7 @@ from .serializers import (
     UnitSerializer,
     WebsiteInformationsSerializer,
 )
+from .services import clean_page_data
 
 
 class FaqView(generics.GenericAPIView):
@@ -1422,13 +1423,17 @@ class PageView(generics.GenericAPIView):
 
     def patch(self, request, pk, *args, **kwargs):
         page = get_object_or_404(Page, pk=pk)
+
         if not (request.user.is_superuser or request.user in page.allowed_users.all()):
             raise PermissionDenied("Você não tem permissão para editar esta página.")
 
-        serializer = self.get_serializer(page, data=request.data, partial=True)
+        data = clean_page_data(request)
+
+        serializer = self.get_serializer(page, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, *args, **kwargs):
