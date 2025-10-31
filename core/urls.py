@@ -16,6 +16,7 @@ from core.views import (
     HeaderView,
     NewsAttachmentView,
     NewsGalleryImageView,
+    NewsPaginationView,
     NewsView,
     PageView,
     PopupIncrementClickView,
@@ -104,6 +105,7 @@ urlpatterns = [
     path("news/", NewsView.as_view(), name="news-list-create"),
     path("news/<int:pk>/", NewsView.as_view(), name="news-detail"),
     path("news/<slug:slug>/", NewsView.as_view(), name="news-detail"),
+    path("news/pagination/", NewsPaginationView.as_view(), name="news-pagination-list-create"),
     path(
         "card-register/", CardRegisterView.as_view(), name="card_register-list-create"
     ),
