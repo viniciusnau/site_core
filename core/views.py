@@ -69,7 +69,7 @@ from .serializers import (
     UnitSerializer,
     WebsiteInformationsSerializer,
 )
-from .services import clean_page_data
+from .services import clean_page_data, update_pages_path
 
 
 class FaqView(generics.GenericAPIView):
@@ -1478,6 +1478,7 @@ class HeaderView(generics.GenericAPIView):
         if serializer.is_valid():
             try:
                 serializer.save(author=request.user)
+                update_pages_path(serializer.data['structure'])
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except ValidationError as e:
                 if hasattr(e, "message_dict"):
@@ -1491,6 +1492,7 @@ class HeaderView(generics.GenericAPIView):
             serializer = self.get_serializer(header, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save(author=request.user)
+                update_pages_path(serializer.data['structure'])
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:

@@ -48,6 +48,7 @@ class Cards(BasePublishModel):
         unique=True,
         error_messages={"unique": "Já existe um card com este título."},
     )
+    path = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -62,6 +63,7 @@ class CardRegister(BasePublishModel):
         unique=True,
         error_messages={"unique": "Já existe um registro de card com este título."},
     )
+    path = models.TextField(blank=True, null=True)
     subtitle = models.CharField(max_length=255, blank=True, null=True)
     image = models.ImageField(upload_to="cards/images/", blank=True, null=True)
     text = models.TextField(blank=True, null=True)
@@ -302,6 +304,7 @@ class News(BasePublishModel):
         unique=True,
         error_messages={"unique": "Já existe uma notícia com este título."},
     )
+    path = models.TextField(blank=True, null=True)
     subtitle = models.TextField(max_length=500, blank=True, null=True)
     thumbnail = models.ImageField(upload_to="thumbnails/")
     scheduled_at = models.DateTimeField(null=True, blank=True)
@@ -417,6 +420,7 @@ class Posters(BasePublishModel):
         error_messages={"unique": "Já existe uma cartilha com este título."},
     )
     slug = models.SlugField(max_length=300, unique=True, blank=True)
+    path = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to="posters/images/")
     attachment = models.FileField(upload_to="posters/attachments/")

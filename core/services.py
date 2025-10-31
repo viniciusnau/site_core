@@ -6,3 +6,6 @@ def clean_page_data(request):
         data["text"] = None
 
     return data
+
+def update_pages_path(data):
+    print(data)
