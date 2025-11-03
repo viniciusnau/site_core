@@ -130,7 +130,7 @@ class Unit(BasePublishModel):
         ("tocantins", "Tocantins"),
     ]
 
-    unit_name = models.CharField(max_length=255, blank=True, null=True)
+    unit_name = models.CharField(max_length=255, default="")
     core = models.ForeignKey(Core, on_delete=models.CASCADE, related_name="units")
     url = models.URLField(blank=True, null=True)
     observation = models.TextField(blank=True, null=True)
@@ -139,16 +139,14 @@ class Unit(BasePublishModel):
     name_dp = models.CharField(max_length=255, blank=True, null=True)
     email_dp = models.EmailField(blank=True, null=True)
 
-    cep = models.CharField(max_length=10, blank=True, null=True)
-    street = models.CharField(max_length=255, blank=True, null=True)
-    district = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=255, blank=True, null=True)
+    cep = models.CharField(max_length=10, default="")
+    street = models.CharField(max_length=255, default="")
+    district = models.CharField(max_length=255, default="")
+    city = models.CharField(max_length=255, default="")
     state = models.CharField(
         max_length=255,
         choices=STATE_CHOICES,
         default="santa_catarina",
-        blank=True,
-        null=True,
     )
     phone = models.CharField(max_length=20, blank=True, null=True)
     is_whatsapp = models.BooleanField(default=False)
@@ -157,7 +155,7 @@ class Unit(BasePublishModel):
     email = models.EmailField(blank=True, null=True)
 
     types_of_service = models.ForeignKey(
-        TypeOfService, on_delete=models.SET_NULL, null=True
+        TypeOfService, on_delete=models.SET_NULL, null=True, blank=True
     )
     schedules = models.TextField(blank=True, null=True)
 
@@ -172,7 +170,7 @@ class Unit(BasePublishModel):
 
 class Email(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="emails")
-    email = models.EmailField()
+    email = models.EmailField(blank=True, null=True)
 
     def __str__(self):
         return self.email
@@ -180,7 +178,7 @@ class Email(models.Model):
 
 class Contact(BasePublishModel):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="contacts")
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20, blank=True, null=True)
     is_whatsapp = models.BooleanField(default=False)
     department = models.CharField(max_length=255, blank=True, null=True)
 
