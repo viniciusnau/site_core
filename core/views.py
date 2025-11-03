@@ -1503,6 +1503,7 @@ class HeaderView(generics.GenericAPIView):
         if structure:
             updated_structure = update_pages_path(structure)
         else:
+            Page.objects.all().update(status="not_published", path=None)
             updated_structure = None
 
         if hasattr(incoming, "copy"):
