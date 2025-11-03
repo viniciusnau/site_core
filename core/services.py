@@ -1,4 +1,6 @@
+from copy import deepcopy
 from django.utils.text import slugify
+from django.db import transaction
 from core.models import Page
 
 
@@ -12,23 +14,40 @@ def clean_page_data(request):
     return data
 
 
-def update_pages_path(data, parent_path=""):
-    for item in data:
-        name = item.get("name", "")
-        page_info = item.get("page")
-        children = item.get("children", [])
-        current_slug = slugify(name)
-        current_path = f"{parent_path}/{current_slug}".replace("//", "/")
+def update_pages_path(structure):
+    data_copy = deepcopy(structure)
 
-        if isinstance(page_info, dict) and page_info.get("id"):
-            page_id = page_info["id"]
-            try:
-                page = Page.objects.get(id=page_id)
-                page.path = current_path
-                page.status = "published"
-                page.save(update_fields=["path", "status"])
-            except Page.DoesNotExist:
-                print(f"⚠️ Página com id={page_id} não encontrada")
+    def _walk(nodes, parent_slug_path=""):
+        for node in nodes:
+            name = node.get("name", "")
+            slug = slugify(name)
+            if parent_slug_path:
+                current_path = f"{parent_slug_path.rstrip('/')}/{slug}"
+            else:
+                current_path = f"/{slug}" if slug else ""
 
-        if children:
-            update_pages_path(children, current_path)
+            if current_path and not current_path.startswith("/"):
+                current_path = "/" + current_path.lstrip("/")
+
+            page_info = node.get("page")
+            if isinstance(page_info, dict) and page_info.get("id"):
+                page_id = page_info["id"]
+                try:
+                    with transaction.atomic():
+                        page_obj = Page.objects.select_for_update().get(id=page_id)
+                        page_obj.path = current_path
+                        page_obj.status = "published"
+                        page_obj.save(update_fields=["path", "status"])
+                        node.setdefault("page", {})["path"] = current_path
+                except Page.DoesNotExist:
+                    node.setdefault("page", {})["path"] = None
+            else:
+                if isinstance(page_info, dict):
+                    node.setdefault("page", {})["path"] = page_info.get("path")
+
+            children = node.get("children") or []
+            if children:
+                _walk(children, current_path)
+
+    _walk(data_copy, "")
+    return data_copy
