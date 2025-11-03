@@ -9,6 +9,7 @@ from core.views import (
     CardsView,
     CategoryView,
     ContainerView,
+    CoresAndUnitView,
     CoreUnitsView,
     CoreView,
     EmailWebsiteView,
@@ -31,7 +32,6 @@ from core.views import (
     TypeOfServiceView,
     UnitView,
     WebsiteInformationView,
-    CoresAndUnitView,
 )
 
 urlpatterns = [
