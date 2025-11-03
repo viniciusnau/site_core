@@ -75,12 +75,17 @@ class UnitServiceSerializer(serializers.ModelSerializer):
 
 
 class ContactSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    department = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    is_whatsapp = serializers.BooleanField(required=False, default=False)
+    
     class Meta:
         model = Contact
         fields = ["phone", "is_whatsapp", "department"]
 
-
 class EmailSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
+    
     class Meta:
         model = Email
         fields = ["email", "id"]
@@ -92,8 +97,8 @@ class UnitSerializer(serializers.ModelSerializer):
         many=True, queryset=AreaOfDuty.objects.all(), slug_field="dutie_name"
     )
     core = serializers.PrimaryKeyRelatedField(queryset=Core.objects.all())
-    contacts = ContactSerializer(many=True)
-    emails = EmailSerializer(many=True)
+    contacts = ContactSerializer(many=True, required=False)
+    emails = EmailSerializer(many=True, required=False)
 
     class Meta:
         model = Unit
@@ -105,18 +110,23 @@ class UnitSerializer(serializers.ModelSerializer):
         area_data = validated_data.pop("area_of_duty", [])
         contacts_data = validated_data.pop("contacts", [])
         emails_data = validated_data.pop("emails", [])
-
+        
         unit = Unit.objects.create(**validated_data)
         unit.area_of_duty.set(area_data)
-
+        
         for service_data in services_data:
             UnitService.objects.create(unit=unit, **service_data)
-
+        
         for contact_data in contacts_data:
-            Contact.objects.create(unit=unit, **contact_data)
-
+            phone = contact_data.get("phone")
+            if phone and phone.strip():
+                Contact.objects.create(unit=unit, **contact_data)
+        
         for email_data in emails_data:
-            Email.objects.create(unit=unit, **email_data)
+            email = email_data.get("email")
+            if email and email.strip():
+                Email.objects.create(unit=unit, **email_data)
+        
         return unit
 
     def update(self, instance, validated_data):
@@ -124,25 +134,29 @@ class UnitSerializer(serializers.ModelSerializer):
         area_data = validated_data.pop("area_of_duty", [])
         contacts_data = validated_data.pop("contacts", [])
         emails_data = validated_data.pop("emails", [])
-
+        
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-
+        
         instance.area_of_duty.set(area_data)
-
+        
         instance.services.all().delete()
         for service_data in services_data:
             UnitService.objects.create(unit=instance, **service_data)
-
+        
         instance.contacts.all().delete()
         for contact_data in contacts_data:
-            Contact.objects.create(unit=instance, **contact_data)
-
+            phone = contact_data.get("phone")
+            if phone and phone.strip():
+                Contact.objects.create(unit=instance, **contact_data)
+        
         instance.emails.all().delete()
         for email_data in emails_data:
-            Email.objects.create(unit=instance, **email_data)
-
+            email = email_data.get("email")
+            if email and email.strip():
+                Email.objects.create(unit=instance, **email_data)
+        
         return instance
 
 
