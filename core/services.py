@@ -16,6 +16,7 @@ def clean_page_data(request):
 
 def update_pages_path(structure):
     data_copy = deepcopy(structure)
+    id_list = []
 
     def _walk(nodes, parent_slug_path=""):
         for node in nodes:
@@ -35,6 +36,7 @@ def update_pages_path(structure):
                 try:
                     with transaction.atomic():
                         page_obj = Page.objects.select_for_update().get(id=page_id)
+                        id_list.append(page_id)
                         page_obj.path = current_path
                         page_obj.status = "published"
                         page_obj.save(update_fields=["path", "status"])
@@ -50,4 +52,5 @@ def update_pages_path(structure):
                 _walk(children, current_path)
 
     _walk(data_copy, "")
+    Page.objects.exclude(id__in=id_list).update(status="not_published", path=None)
     return data_copy
