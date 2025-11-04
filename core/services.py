@@ -42,7 +42,7 @@ def update_pages_path(structure):
                         page_obj.save(update_fields=["path", "status"])
                         node.setdefault("page", {})["path"] = current_path
                 except Page.DoesNotExist:
-                    node.setdefault("page", {})["path"] = None
+                    node["page"] = None
             else:
                 if isinstance(page_info, dict):
                     node.setdefault("page", {})["path"] = page_info.get("path")
