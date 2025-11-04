@@ -1,7 +1,23 @@
 from copy import deepcopy
 from django.utils.text import slugify
 from django.db import transaction
-from core.models import Page
+from core.models import Page, News, Posters, CardRegister
+
+
+def update_path_on_page_deletion(page):
+    if page.has_posters:
+        Posters.objects.all().update(path=None)
+    if page.has_news:
+        News.objects.all().update(path=None)
+    if page.card:
+        page.card.path = None
+        page.card.status = "not_published"
+        page.card.save()
+        registers = CardRegister.objects.filter(card=page.card)
+        if registers:
+            for register in registers:
+                register.path = None
+                register.save()
 
 
 def clean_page_data(request):
@@ -12,6 +28,20 @@ def clean_page_data(request):
         data["text"] = None
 
     return data
+
+
+def update_news_path(path):
+    news_list = News.objects.all()
+    for news in news_list:
+        news.path = f'{path}/{news.slug}'
+        news.save()
+
+
+def update_posters_path(path):
+    posters_list = Posters.objects.all()
+    for poster in posters_list:
+        poster.path = f'{path}/{poster.slug}'
+        poster.save()
 
 
 def update_pages_path(structure):
@@ -36,6 +66,10 @@ def update_pages_path(structure):
                 try:
                     with transaction.atomic():
                         page_obj = Page.objects.select_for_update().get(id=page_id)
+                        if page_obj.has_news:
+                            update_news_path(current_path)
+                        if page_obj.has_posters:
+                            update_posters_path(current_path)
                         id_list.append(page_id)
                         page_obj.path = current_path
                         page_obj.status = "published"

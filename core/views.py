@@ -69,7 +69,7 @@ from .serializers import (
     UnitSerializer,
     WebsiteInformationsSerializer,
 )
-from .services import clean_page_data, update_pages_path
+from .services import clean_page_data, update_pages_path, update_path_on_page_deletion
 
 
 class FaqView(generics.GenericAPIView):
@@ -1438,6 +1438,7 @@ class PageView(generics.GenericAPIView):
 
     def delete(self, request, pk, *args, **kwargs):
         page = get_object_or_404(Page, pk=pk)
+        update_path_on_page_deletion(page)
         if not (request.user.is_superuser or request.user in page.allowed_users.all()):
             raise PermissionDenied("Você não tem permissão para excluir esta página.")
 
