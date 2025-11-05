@@ -528,10 +528,27 @@ class BannerSerializer(serializers.ModelSerializer):
 
 
 class ContainerSerializer(serializers.ModelSerializer):
+    internal_link = serializers.PrimaryKeyRelatedField(
+        queryset=Page.objects.all(),
+        allow_null=True,
+        required=False
+    )
+
     class Meta:
         model = Container
         fields = "__all__"
         read_only_fields = ["author", "created_at", "updated_at", "published_at"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.internal_link:
+            data["internal_link"] = {
+                "id": instance.internal_link.id,
+                "path": instance.internal_link.path,
+            }
+        else:
+            data["internal_link"] = None
+        return data
 
 
 class ServiceButtonsSerializer(serializers.ModelSerializer):
