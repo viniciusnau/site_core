@@ -506,11 +506,25 @@ class Banner(BasePublishModel):
 
 
 class Container(BasePublishModel):
+    TYPE_CHOICES = [
+        ("internal", "Interno"),
+        ("external", "Externo"),
+    ]
+        
     show_title = models.BooleanField(default=False)
     title = models.CharField(max_length=255, default="Título Padrão")
     title_color = models.CharField(max_length=255, blank=True, null=True)
     background_color = models.CharField(max_length=255, blank=True, null=True)
-    redirect_button = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True, choices=TYPE_CHOICES)
+    external_link = models.CharField(max_length=255, blank=True, null=True)
+    internal_link = models.ForeignKey(
+        "Page",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="containers",
+        help_text="Página interna"
+    )
 
     def __str__(self):
         return self.title
