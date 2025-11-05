@@ -1453,6 +1453,11 @@ class CoresAndUnitView(generics.GenericAPIView):
     queryset = Core.objects.all()
     serializer_class = CoresAndUnitSerializer
 
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
     def get(self, request, *args, **kwargs):
         cores_and_unit = self.get_queryset().order_by("-created_at")
         cores_with_units = cores_and_unit.filter(units__isnull=False).distinct()
@@ -1468,6 +1473,11 @@ class CoresAndUnitView(generics.GenericAPIView):
 class HeaderView(generics.GenericAPIView):
     serializer_class = HeaderSerializer
     queryset = Header.objects.all()
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get(self, request, *args, **kwargs):
         header = self.get_queryset()
@@ -1489,15 +1499,30 @@ class HeaderView(generics.GenericAPIView):
 
     def patch(self, request, *args, **kwargs):
         header = Header.objects.first()
+        incoming = request.data
+        structure = incoming.get("structure")
+        if structure:
+            updated_structure = update_pages_path(structure)
+        else:
+            Page.objects.all().update(status="not_published", path=None)
+            updated_structure = None
+
+        if hasattr(incoming, "copy"):
+            data = incoming.copy()
+        else:
+            data = dict(incoming)
+
+        if updated_structure is not None:
+            data["structure"] = updated_structure
+
         if header:
-            serializer = self.get_serializer(header, data=request.data, partial=True)
+            serializer = self.get_serializer(header, data=data, partial=True)
             if serializer.is_valid():
                 serializer.save(author=request.user)
-                update_pages_path(serializer.data['structure'])
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            serializer = self.get_serializer(data=request.data)
+            serializer = self.get_serializer(data=data)
             if serializer.is_valid():
                 serializer.save(author=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
